@@ -115,6 +115,38 @@ cd ~/robot
 
 The servo should repeat center, left, and right movement.
 
+## Tailscale VPN Test
+
+On the Pi, check that Tailscale is active:
+
+```bash
+systemctl status tailscaled --no-pager
+```
+
+Look for `active (running)`.
+
+Gather the Pi Tailscale IP:
+
+```bash
+tailscale status
+```
+
+The Pi Tailscale IP should be listed in the output.
+
+On the Windows PC:
+
+- Confirm the Tailscale app is running in the system tray.
+- Confirm the PC Tailscale IP in the Tailscale app.
+- You can also check the PC Tailscale IP with `ipconfig`.
+
+From Windows PowerShell, verify that the PC can reach the robot:
+
+```powershell
+ping 100.69.90.121
+```
+
+Replace `100.69.90.121` with the current Pi Tailscale IP if it changed.
+
 ## WebSocket Steering Test
 
 Check that the WebSocket service is running on the Pi:

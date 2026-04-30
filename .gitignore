@@ -1,3 +1,9 @@
-# Local duplicates on Windows
-/network/
-/tests/
+# Python generated files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+robot-env/

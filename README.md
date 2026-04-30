@@ -64,11 +64,43 @@ sudo apt install -y i2c-tools
 
 ## Windows PC Setup
 
-Install Python 3, then install the sender dependency:
+### Tailscale
+
+Download and install Tailscale from:
+
+```text
+https://tailscale.com/download/windows
+```
+
+Log in with Google using the Eclipse860 account.
+
+### Python Install
+
+Open PowerShell as Administrator:
+
+```powershell
+winget install Python.Python.3.13
+```
+
+Exit PowerShell, then relaunch PowerShell so the updated Python path is loaded.
+
+### Websockets Install
+
+Install the Python WebSocket dependency:
+
+```powershell
+pip install websockets
+```
+
+You can also install from the repo dependency file:
 
 ```powershell
 python -m pip install -r requirements-pc.txt
 ```
+
+### VLC
+
+Install VLC from the Windows App Store.
 
 Update `PI_IP` in `pc/ws_send.py` if the Pi Tailscale IP changes.
 

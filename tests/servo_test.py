@@ -2,8 +2,8 @@ import argparse
 import time
 
 import busio
-from board import SCL, SDA
 from adafruit_pca9685 import PCA9685
+from board import SCL, SDA
 
 PWM_PERIOD_MS = 20.0
 DEFAULT_FREQUENCY_HZ = 50

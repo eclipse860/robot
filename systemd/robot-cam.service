@@ -1,0 +1,16 @@
+[Unit]
+Description=Remote Robot Camera Stream (MJPEG over TCP)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=phil
+WorkingDirectory=/home/phil
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/rpicam-vid -t 0 --codec mjpeg --width 1280 --height 720 --framerate 15 --quality 85 --listen -o tcp://0.0.0.0:8888
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

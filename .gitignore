@@ -1,10 +1,18 @@
+# Python generated files
 __pycache__/
 *.py[cod]
+*$py.class
+
+# Tool caches
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Virtual environments
 .venv/
 venv/
 robot-env/
+
+# Local runtime / agent files
 .lgd-*
 .codex

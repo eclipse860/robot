@@ -34,3 +34,29 @@ All notable changes to this robot project should be recorded here before committ
 - Added a timed reverse mode to `./robot motor-test --armed --reverse` for lifted-wheel ESC testing.
 - Updated the reverse motor test default to the real-robot reverse start threshold of `1.35 ms`.
 - Documented the hardware layout, setup, local test commands, ESC calibration result, and measured forward/reverse wheel-start thresholds in `README.md`.
+
+## v0.4.0 - 2026-05-03
+
+- Refactored `network/ws_server.py` so importing it no longer initializes Raspberry Pi I2C or PCA9685 hardware.
+- Added a `RobotOutputs` hardware adapter and `create_outputs()` factory for runtime PCA9685 setup.
+- Added unit tests for WebSocket server pulse conversion, steering/throttle mapping, safe output behavior, and JSON command application.
+- Added `tests/__init__.py` so standard `unittest discover` finds the automated tests.
+
+## v0.5.0 - 2026-05-03
+
+- Moved real robot hardware scripts from `tests/` to `hardware_tests/` so automated tests and hardware exercises are clearly separated.
+- Added a menu-driven hardware test launcher available through `./robot menu` or `./robot hardware-menu`.
+- Kept the existing direct hardware test commands working through `./robot servo-test`, `./robot motor-test`, `./robot esc-calibrate`, and `./robot esc-pulse`.
+- Added `./robot test` for automated unit tests and `./robot check` for syntax checks.
+- Added `pyproject.toml` with project metadata and optional Raspberry Pi / PC dependency groups.
+- Updated `README.md` with the new layout, menu command, and test/check commands.
+
+## v0.6.0 - 2026-05-03
+
+- Added an async WebSocket handler test that verifies the watchdog failsafe returns steering and throttle to safe outputs when a connected client goes idle.
+
+## v0.7.0 - 2026-05-03
+
+- Added a menu option to run the automated robot test suite from the interactive launcher.
+- The menu now describes the automated test coverage before running the suite.
+- Updated `README.md` to note that the menu can run automated tests.

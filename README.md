@@ -49,13 +49,16 @@ The earlier motor test used a bench motor. On the real robot, the wheels did not
 
 ```text
 network/ws_server.py         Pi WebSocket server for steering and throttle control
-tests/servo_test.py          Direct Pi/PCA9685 steering servo test
-tests/motor_test.py          Direct Pi/PCA9685 ESC motor test
-tests/esc_calibrate.py       Guided ESC endpoint calibration
-tests/esc_pulse.py           Interactive ESC pulse diagnostic
+hardware_tests/menu.py       Menu-driven launcher for real robot hardware tests
+hardware_tests/servo_test.py Direct Pi/PCA9685 steering servo test
+hardware_tests/motor_test.py Direct Pi/PCA9685 ESC motor test
+hardware_tests/esc_calibrate.py Guided ESC endpoint calibration
+hardware_tests/esc_pulse.py  Interactive ESC pulse diagnostic
+tests/test_ws_server.py      Automated WebSocket server unit tests
 pc/ws_send.py                Windows WebSocket command sender
 requirements-rpi.txt         Python dependencies for the Raspberry Pi
 requirements-pc.txt          Python dependencies for the Windows PC sender
+pyproject.toml               Project metadata and optional dependency groups
 systemd/robot-ws.service     WebSocket service template
 systemd/robot-cam.service    Camera stream service template
 CHANGELOG.md                 Project change log
@@ -152,6 +155,16 @@ Run commands from the repository root:
 cd /home/phil/robot
 ```
 
+Start the menu-driven hardware test launcher:
+
+```bash
+./robot menu
+```
+
+The menu also includes an option to run the automated robot tests.
+
+The old direct hardware test commands still work.
+
 Run one finite steering servo test cycle:
 
 ```bash
@@ -180,6 +193,24 @@ Hold an ESC diagnostic pulse interactively:
 
 ```bash
 ./robot esc-pulse --armed --pulse-ms 1.50
+```
+
+The motor, ESC pulse, and ESC calibration menu options ask you to type `ARMED`
+before they run. The direct CLI commands still require `--armed`.
+
+## Automated Tests
+
+Automated tests do not touch the robot hardware and can run on a normal dev
+machine or on the Pi:
+
+```bash
+./robot test
+```
+
+Run the broader syntax check:
+
+```bash
+./robot check
 ```
 
 ## ESC Calibration

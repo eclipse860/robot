@@ -28,7 +28,7 @@ Raspberry Pi 5 based remote robot control project. The Pi drives a PCA9685 PWM b
 Current tested control path:
 
 ```text
-Windows ws_send.py -> Tailscale -> Pi WebSocket server -> PCA9685 -> steering servo / ESC
+Windows keyboard_send.py -> Tailscale -> Pi WebSocket server -> PCA9685 -> steering servo / ESC
 ```
 
 Steering pulse defaults:
@@ -42,6 +42,7 @@ ESC pulse defaults:
 - Neutral: `1.50 ms`
 - Forward wheel-start on the real robot: about `1.64 ms`
 - Reverse wheel-start on the real robot: about `1.35 ms`
+- WebSocket throttle commands are signed: `-1.0` reverse/brake, `0.0` neutral, `1.0` forward.
 
 The earlier motor test used a bench motor. On the real robot, the wheels did not begin turning until about `1.64 ms` forward and `1.35 ms` reverse. Reverse motion at `1.35 ms` is very slow.
 
@@ -55,7 +56,10 @@ hardware_tests/motor_test.py Direct Pi/PCA9685 ESC motor test
 hardware_tests/esc_calibrate.py Guided ESC endpoint calibration
 hardware_tests/esc_pulse.py  Interactive ESC pulse diagnostic
 tests/test_ws_server.py      Automated WebSocket server unit tests
+pc/keyboard_send.py          Windows keyboard RC control sender
 pc/ws_send.py                Windows WebSocket command sender
+keyboard_send.py             Root Windows keyboard RC control sender
+ws_send.py                   Root Windows WebSocket steering demo
 requirements-rpi.txt         Python dependencies for the Raspberry Pi
 requirements-pc.txt          Python dependencies for the Windows PC sender
 pyproject.toml               Project metadata and optional dependency groups
@@ -145,7 +149,35 @@ python -m pip install -r requirements-pc.txt
 
 Install VLC from the Windows App Store.
 
-Update `PI_IP` in `pc/ws_send.py` if the Pi Tailscale IP changes.
+Pass the Pi Tailscale IP to PC control scripts with `--host`, or update the
+default host in the script if the Pi Tailscale IP changes.
+
+## Windows Keyboard Control
+
+Run the WebSocket server on the Pi, then run the keyboard sender from Windows:
+
+```powershell
+cd C:\code\robot
+python keyboard_send.py --host 100.69.90.121
+```
+
+Replace `100.69.90.121` with the current Pi Tailscale IP if it changed.
+
+Keyboard controls:
+
+```text
+W or Up       increase forward throttle
+S or Down     increase reverse/brake throttle
+A or Left     steer left
+D or Right    steer right
+Space         neutral throttle
+C             center steering
+X             neutral throttle and center steering
+Q             quit
+```
+
+The sender continuously transmits at `20 Hz` by default. Initial limits are
+conservative: `0.30` forward, `0.20` reverse, and `0.80` steering.
 
 ## Local Hardware Tests
 
@@ -273,7 +305,7 @@ sudo journalctl -u robot-ws.service -f
 From Windows:
 
 ```powershell
-cd C:\code\robot\pc
+cd C:\code\robot
 python ws_send.py
 ```
 

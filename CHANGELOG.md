@@ -60,3 +60,14 @@ All notable changes to this robot project should be recorded here before committ
 - Added a menu option to run the automated robot test suite from the interactive launcher.
 - The menu now describes the automated test coverage before running the suite.
 - Updated `README.md` to note that the menu can run automated tests.
+
+## v0.8.0 - 2026-05-03
+
+- Updated the WebSocket control contract so throttle commands are signed from `-1.0` reverse/brake through `0.0` neutral to `1.0` forward.
+- Added automated tests for reverse throttle mapping and command application.
+- Added `pc/keyboard_send.py` for continuous Windows keyboard control over Tailscale.
+- Added root-level `keyboard_send.py` and `ws_send.py` scripts for Windows checkouts where commands are run from `C:\code\robot`.
+- The keyboard sender sends neutral throttle and centered steering when exiting.
+- Updated `./robot check` to syntax-check PC control scripts.
+- Updated README and PC-side documentation with keyboard controls, conservative default limits, and signed throttle behavior.
+- Bumped `pyproject.toml` project metadata to `0.8.0`.

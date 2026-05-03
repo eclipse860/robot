@@ -18,8 +18,9 @@ PWM_FREQ = 50
 LEFT_MS = 1.20
 CENTER_MS = 1.50
 RIGHT_MS = 1.80
-THROTTLE_MIN_MS = 1.50
-THROTTLE_MAX_MS = 2.00
+THROTTLE_REVERSE_MS = 1.00
+THROTTLE_NEUTRAL_MS = 1.50
+THROTTLE_FORWARD_MS = 2.00
 
 
 def clamp(v, lo, hi):
@@ -39,9 +40,11 @@ def steering_ms_from_unit(x: float) -> float:
 
 
 def throttle_ms_from_unit(x: float) -> float:
-    """x in [0.0, 1.0] -> pulse width ms."""
-    x = clamp(x, 0.0, 1.0)
-    return THROTTLE_MIN_MS + x * (THROTTLE_MAX_MS - THROTTLE_MIN_MS)
+    """x in [-1.0, +1.0] -> pulse width ms."""
+    x = clamp(x, -1.0, 1.0)
+    if x >= 0:
+        return THROTTLE_NEUTRAL_MS + x * (THROTTLE_FORWARD_MS - THROTTLE_NEUTRAL_MS)
+    return THROTTLE_NEUTRAL_MS + x * (THROTTLE_NEUTRAL_MS - THROTTLE_REVERSE_MS)
 
 
 class RobotOutputs:

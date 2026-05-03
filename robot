@@ -40,6 +40,10 @@ case "${1:-}" in
       "$ROOT_DIR/hardware_tests/esc_calibrate.py" \
       "$ROOT_DIR/hardware_tests/esc_pulse.py" \
       "$ROOT_DIR/hardware_tests/menu.py" \
+      "$ROOT_DIR/keyboard_send.py" \
+      "$ROOT_DIR/pc/keyboard_send.py" \
+      "$ROOT_DIR/pc/ws_send.py" \
+      "$ROOT_DIR/ws_send.py" \
       "$ROOT_DIR/tests/test_ws_server.py"
     ;;
   *)

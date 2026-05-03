@@ -1,32 +1,43 @@
-PC-side control scripts for the Remote Robot project.
+# PC Control Scripts
 
+These scripts run on the Windows PC and communicate with the Raspberry Pi over
+Tailscale using WebSocket commands.
 
+## Setup
 
-Requirements:
+Install Python and dependencies:
 
-\- Python 3.x on Windows
+```powershell
+python -m pip install -r requirements-pc.txt
+```
 
-\- websockets library
-
-
-
-Setup:
-
-&nbsp; python -m pip install websockets
-
-
+## Keyboard RC Control
 
 Run:
 
-&nbsp; python ws\_send.py
+```powershell
+python keyboard_send.py --host 100.69.90.121
+```
 
+Replace `100.69.90.121` with the current Pi Tailscale IP.
 
+Controls:
 
-Notes:
+```text
+W or Up       increase forward throttle
+S or Down     increase reverse/brake throttle
+A or Left     steer left
+D or Right    steer right
+Space         neutral throttle
+C             center steering
+X             neutral throttle and center steering
+Q             quit
+```
 
-\- This code runs on the PC only.
+## Steering Demo
 
-\- It communicates with the Pi over Tailscale via WebSocket.
+Run:
 
-
-
+```powershell
+python ws_send.py
+```

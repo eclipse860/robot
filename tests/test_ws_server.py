@@ -68,10 +68,12 @@ class WsServerTests(unittest.TestCase):
         self.assertAlmostEqual(ws_server.steering_ms_from_unit(-0.5), 1.35)
 
     def test_throttle_mapping_clamps_and_interpolates(self):
-        self.assertEqual(ws_server.throttle_ms_from_unit(-1.0), ws_server.THROTTLE_MIN_MS)
-        self.assertEqual(ws_server.throttle_ms_from_unit(0.0), ws_server.THROTTLE_MIN_MS)
-        self.assertEqual(ws_server.throttle_ms_from_unit(1.0), ws_server.THROTTLE_MAX_MS)
-        self.assertEqual(ws_server.throttle_ms_from_unit(2.0), ws_server.THROTTLE_MAX_MS)
+        self.assertEqual(ws_server.throttle_ms_from_unit(-2.0), ws_server.THROTTLE_REVERSE_MS)
+        self.assertEqual(ws_server.throttle_ms_from_unit(-1.0), ws_server.THROTTLE_REVERSE_MS)
+        self.assertEqual(ws_server.throttle_ms_from_unit(0.0), ws_server.THROTTLE_NEUTRAL_MS)
+        self.assertEqual(ws_server.throttle_ms_from_unit(1.0), ws_server.THROTTLE_FORWARD_MS)
+        self.assertEqual(ws_server.throttle_ms_from_unit(2.0), ws_server.THROTTLE_FORWARD_MS)
+        self.assertAlmostEqual(ws_server.throttle_ms_from_unit(-0.5), 1.25)
         self.assertAlmostEqual(ws_server.throttle_ms_from_unit(0.5), 1.75)
 
     def test_outputs_write_pwm_duty_cycles(self):
@@ -79,7 +81,7 @@ class WsServerTests(unittest.TestCase):
         self.outputs.set_throttle_unit(1.0)
 
         self.assertEqual(self.steering.duty_cycle, ws_server.ms_to_duty(ws_server.RIGHT_MS))
-        self.assertEqual(self.throttle.duty_cycle, ws_server.ms_to_duty(ws_server.THROTTLE_MAX_MS))
+        self.assertEqual(self.throttle.duty_cycle, ws_server.ms_to_duty(ws_server.THROTTLE_FORWARD_MS))
 
     def test_outputs_set_safe_centers_and_stops(self):
         self.outputs.set_steering_unit(1.0)
@@ -88,14 +90,14 @@ class WsServerTests(unittest.TestCase):
         self.outputs.set_safe()
 
         self.assertEqual(self.steering.duty_cycle, ws_server.ms_to_duty(ws_server.CENTER_MS))
-        self.assertEqual(self.throttle.duty_cycle, ws_server.ms_to_duty(ws_server.THROTTLE_MIN_MS))
+        self.assertEqual(self.throttle.duty_cycle, ws_server.ms_to_duty(ws_server.THROTTLE_NEUTRAL_MS))
 
     def test_apply_message_defaults_missing_values_to_safe(self):
         steering, throttle = ws_server.apply_message(self.outputs, "{}")
 
         self.assertEqual((steering, throttle), (0.0, 0.0))
         self.assertEqual(self.steering.duty_cycle, ws_server.ms_to_duty(ws_server.CENTER_MS))
-        self.assertEqual(self.throttle.duty_cycle, ws_server.ms_to_duty(ws_server.THROTTLE_MIN_MS))
+        self.assertEqual(self.throttle.duty_cycle, ws_server.ms_to_duty(ws_server.THROTTLE_NEUTRAL_MS))
 
     def test_apply_message_sets_requested_outputs(self):
         steering, throttle = ws_server.apply_message(
@@ -106,6 +108,15 @@ class WsServerTests(unittest.TestCase):
         self.assertEqual(self.steering.duty_cycle, ws_server.ms_to_duty(1.35))
         self.assertEqual(self.throttle.duty_cycle, ws_server.ms_to_duty(1.75))
 
+    def test_apply_message_sets_reverse_throttle(self):
+        steering, throttle = ws_server.apply_message(
+            self.outputs, '{"steering": 0.25, "throttle": -0.5}'
+        )
+
+        self.assertEqual((steering, throttle), (0.25, -0.5))
+        self.assertEqual(self.steering.duty_cycle, ws_server.ms_to_duty(1.575))
+        self.assertEqual(self.throttle.duty_cycle, ws_server.ms_to_duty(1.25))
+
     def test_apply_message_rejects_bad_input_without_changing_outputs(self):
         self.outputs.set_safe()
 
@@ -113,7 +124,7 @@ class WsServerTests(unittest.TestCase):
             ws_server.apply_message(self.outputs, '{"steering": "left"}')
 
         self.assertEqual(self.steering.duty_cycle, ws_server.ms_to_duty(ws_server.CENTER_MS))
-        self.assertEqual(self.throttle.duty_cycle, ws_server.ms_to_duty(ws_server.THROTTLE_MIN_MS))
+        self.assertEqual(self.throttle.duty_cycle, ws_server.ms_to_duty(ws_server.THROTTLE_NEUTRAL_MS))
 
 
 class WsServerAsyncTests(unittest.IsolatedAsyncioTestCase):
@@ -141,11 +152,11 @@ class WsServerAsyncTests(unittest.IsolatedAsyncioTestCase):
             websocket.outputs_during_idle,
             (
                 ws_server.ms_to_duty(ws_server.CENTER_MS),
-                ws_server.ms_to_duty(ws_server.THROTTLE_MIN_MS),
+                ws_server.ms_to_duty(ws_server.THROTTLE_NEUTRAL_MS),
             ),
         )
         self.assertIn(ws_server.ms_to_duty(ws_server.RIGHT_MS), steering.history)
-        self.assertIn(ws_server.ms_to_duty(ws_server.THROTTLE_MAX_MS), throttle.history)
+        self.assertIn(ws_server.ms_to_duty(ws_server.THROTTLE_FORWARD_MS), throttle.history)
 
 
 if __name__ == "__main__":

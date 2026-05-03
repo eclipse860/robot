@@ -193,7 +193,9 @@ Start the menu-driven hardware test launcher:
 ./robot menu
 ```
 
-The menu also includes an option to run the automated robot tests.
+The menu pauses `robot-ws.service` before direct PCA9685 hardware tests and
+starts it again afterward so PC keyboard control does not keep a stale hardware
+handle. The menu also includes an option to run the automated robot tests.
 
 The old direct hardware test commands still work.
 

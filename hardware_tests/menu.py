@@ -1,10 +1,12 @@
 import subprocess
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 HARDWARE_TEST_DIR = ROOT_DIR / "hardware_tests"
+ROBOT_WS_SERVICE = "robot-ws.service"
 
 
 def run_script(script_name, *args):
@@ -14,6 +16,47 @@ def run_script(script_name, *args):
 
 def run_robot_command(*args):
     subprocess.run([str(ROOT_DIR / "robot"), *args], check=False)
+
+
+def service_is_active(service_name):
+    result = subprocess.run(
+        ["systemctl", "is-active", "--quiet", service_name],
+        check=False,
+    )
+    return result.returncode == 0
+
+
+def run_systemctl(*args):
+    return subprocess.run(
+        ["sudo", "-n", "systemctl", *args],
+        check=False,
+    )
+
+
+@contextmanager
+def pause_websocket_service():
+    was_active = service_is_active(ROBOT_WS_SERVICE)
+    if was_active:
+        print()
+        print(f"Pausing {ROBOT_WS_SERVICE} for direct hardware access.")
+        result = run_systemctl("stop", ROBOT_WS_SERVICE)
+        if result.returncode != 0:
+            print(
+                f"Could not stop {ROBOT_WS_SERVICE}; continuing may leave "
+                "the WebSocket server competing for the PCA9685."
+            )
+    try:
+        yield
+    finally:
+        if was_active:
+            print()
+            print(f"Restarting {ROBOT_WS_SERVICE}.")
+            result = run_systemctl("start", ROBOT_WS_SERVICE)
+            if result.returncode != 0:
+                print(
+                    f"Could not restart {ROBOT_WS_SERVICE}. Run "
+                    f"`sudo systemctl restart {ROBOT_WS_SERVICE}` before PC control."
+                )
 
 
 def confirm_armed():
@@ -64,11 +107,13 @@ def ask_int(prompt, default_value, min_value=None):
 
 def run_servo_cycle():
     cycles = ask_int("Servo cycles", 1, min_value=1)
-    run_script("servo_test.py", "--cycles", str(cycles))
+    with pause_websocket_service():
+        run_script("servo_test.py", "--cycles", str(cycles))
 
 
 def run_servo_forever():
-    run_script("servo_test.py", "--forever")
+    with pause_websocket_service():
+        run_script("servo_test.py", "--forever")
 
 
 def run_motor(reverse=False):
@@ -78,14 +123,16 @@ def run_motor(reverse=False):
     args = ["--armed"]
     if reverse:
         args.append("--reverse")
-    run_script("motor_test.py", *args)
+    with pause_websocket_service():
+        run_script("motor_test.py", *args)
 
 
 def run_esc_calibration():
     if not confirm_armed():
         print("Canceled.")
         return
-    run_script("esc_calibrate.py", "--armed")
+    with pause_websocket_service():
+        run_script("esc_calibrate.py", "--armed")
 
 
 def run_esc_pulse():
@@ -93,7 +140,8 @@ def run_esc_pulse():
         print("Canceled.")
         return
     pulse_ms = ask_float("Starting pulse in ms", 1.50, min_value=1.0, max_value=2.0)
-    run_script("esc_pulse.py", "--armed", "--pulse-ms", f"{pulse_ms:.2f}")
+    with pause_websocket_service():
+        run_script("esc_pulse.py", "--armed", "--pulse-ms", f"{pulse_ms:.2f}")
 
 
 def run_automated_tests():
